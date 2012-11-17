@@ -1,8 +1,11 @@
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <vector>
+
+#pragma once
+
 
 class Data {
 
@@ -15,5 +18,6 @@ public:
   
 private:
  
-
+  double dataArray[581012][54];
+  int coverType[581012];
 };
