@@ -4,23 +4,27 @@
 using namespace std;
 
 
-Data::Data() {
-
-  //maybe something will go here
+Data::Data() :
+  dataArray(vector<vector<double> >(NUM_EXAMPLES, vector<double>(NUM_ATTRIBUTES))),
+  coverType(vector<int>(NUM_EXAMPLES))
+{
 }
 
 void Data::readData() {
 
-  ifstream dataFile("covtype.data");
-  
+
+  ifstream dataFile;
+  dataFile.open("covtype.data");
+
+
   string line;
   int outer = 0, inner = 0;
-  double max[54], min[54];
-  for (int i = 0; i <= 54; i++) {
+  double max[NUM_ATTRIBUTES], min[NUM_ATTRIBUTES];
+  for (int i = 0; i < NUM_ATTRIBUTES; i++) {
     max[i] = 0;
     min[i] = 100000;
   }
-  
+
   while (std::getline(dataFile, line)) {
     
     istringstream stream(line);
@@ -28,38 +32,34 @@ void Data::readData() {
     inner = 0;
    
     while (stream.getline(value, 100, ',')) {
-      
       double number = std::atof(value);
-      
-      if (inner < 55) {
-	dataArray[outer][inner] = number;
-	if (number > max[inner])
-	  max[inner] = number;
-	else if (number < min[inner])
-	  min[inner] = number;
+      if (inner < NUM_ATTRIBUTES) {
+       	dataArray[outer][inner] = number;
+      	if (number > max[inner])
+      	  max[inner] = number;
+      	else if (number < min[inner])
+      	  min[inner] = number;
+ 
       }
       else
-	coverType[outer] = number;
+      	coverType[outer] = number;
 
       inner++;
     }
     outer++;
   }
 
-  for (int i = 0; i < 581012; i++) {
-    for (int j = 0; j < 54; j++) {
+  for (int i = 0; i < NUM_EXAMPLES; i++) {
+    for (int j = 0; j < NUM_ATTRIBUTES; j++) {
       dataArray[i][j] = (dataArray[i][j] - min[j])/(max[j] - min[j]);
       if (dataArray[i][j] > 1 || dataArray[i][j] < 0) {
 	
       }
     }
   }
-  cout << endl;
 
-  cout << "Outer: " << outer << ", Inner: " << inner << endl;
-  cout << "I opened the file!" << endl;
 
-  dataFile.close();
+  dataFile.close(); //we no longer need the file to be open.
 
 }
 
