@@ -64,10 +64,10 @@ void Data::readData() {
 }
 
 
-int main() {
+// int main() {
 
-  Data *d = new Data();
+//   Data *d = new Data();
 
-  d->readData();
+//   d->readData();
 
-}
+// }

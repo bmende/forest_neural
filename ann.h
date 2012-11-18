@@ -1,5 +1,5 @@
 #include "data.h"
-
+#include <cmath>
 
 struct layer {
   
@@ -17,6 +17,13 @@ class NeuralNetwork {
   ~NeuralNetwork();
 
   void init();
+
+  void forwardProp(std::vector<double> lineIn);
+  
+  //these functions are only used by NeuralNetwork
+ private: 
+  double sigma(double weightedSum);
+  double sigmaPrime(double weightedSum);
 
  private:
   
