@@ -25,17 +25,19 @@ NeuralNetwork::NeuralNetwork(int numInputs, int numHidden) {
 void NeuralNetwork::init() {
 
   //initializing weights to 0.5 each. TODO: make random initial weights
-
+  
   for (int i = 0; i < hidden.numNodes; i++) {
     for (int j = 0; j < hidden.inputs; j++) {
-      hidden.weights[i][j] = 0.5;
+      hidden.weights[i][j] = (double)std::rand() / (double)RAND_MAX;
+      hidden.weights[i][j] /= (double)hidden.numNodes;
     }
     hidden.outputs[i] = 0;
   }
 
   for (int i = 0; i < output.numNodes; i++) {
     for (int j = 0; j < output.inputs; j++) {
-      output.weights[i][j] = 0.5;
+      output.weights[i][j] = (double)std::rand() / (double)RAND_MAX;
+      output.weights[i][j] /= (double)output.numNodes;
     }
     output.outputs[i] = 0;
   }
@@ -57,7 +59,7 @@ double NeuralNetwork::sigmaPrime(double weightedSum) {
   return sig*(1-sig);
 }
 
-void NeuralNetwork::forwardProp(vector<double> lineIn) {
+vector<double> NeuralNetwork::forwardProp(vector<double> lineIn) {
   
   if (lineIn.size() != 54) {
     cerr << "line in not correct size\n";
@@ -74,20 +76,34 @@ void NeuralNetwork::forwardProp(vector<double> lineIn) {
     for (int in = 0; in < hidden.inputs; in++) {
       sum += (inputs[in] * hidden.weights[node][in]);
     }
-    hidden.outputs[node] = sigma(sum);
+    hidden.outputs[node] = sum;
   }
   
   //now for output node calculations
   for (int node = 0; node < output.numNodes; node++) {
     double sum = 0;
     for (int in = 0; in < output.inputs; in++) {
-      sum += (hidden.outputs[in] * output.weights[node][in]);
+      sum += (sigma(hidden.outputs[in]) * output.weights[node][in]);
     }
-    output.outputs[node] = sigma(sum);
+    output.outputs[node] = sum;
   }
-  cout << endl;
+  vector<double> answer(output.numNodes, 0);
+  for (int i = 0; i < answer.size(); i++)
+    answer[i] = sigma(output.outputs[i]);
+  return answer;
 }
 
+vector<double> NeuralNetwork::findErrorVector(vector<double> output, int trainer) {
+
+  vector<double> error(output.size(), 0);
+  for (int i = 0; i < error.size(); i++) {
+    if (trainer == i)
+      error[i] = 1.0 - output[i];
+    else
+      error[i] = 0.0 - output[i];
+  }
+  return error;
+}
 
 int main() {
 
@@ -98,9 +114,10 @@ int main() {
   cout << "data read\nnow making net\n";
   NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, 120);
   net->init();
-  cout << "net initialized with weights = 0.5\n";
+  cout << "net initialized with random weights\n";
   
-    net->forwardProp(d->getData()[0]);
-
-
+  for (int i = 0; i < 40; i++) {
+    vector<double> out = net->forwardProp(d->getData()[i]);
+    vector<double> err = net->findErrorVector(out, d->getCover(i));
+  }
 }
