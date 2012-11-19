@@ -21,7 +21,7 @@ public:
 
   void readData();
   double getData(int i, int j) { return dataArray[i][j]; }
-  two_d_vec getData() { return dataArray; }
+  const two_d_vec& getData() { return dataArray; }
   int getCover(int i) { return coverType[i]; }
   std::vector< int > getCover() { return coverType; }
   

@@ -70,7 +70,7 @@ double NeuralNetwork::sigmaPrime(double weightedSum) {
   return sig*(1-sig);
 }
 
-vector<double> NeuralNetwork::forwardProp(vector<double> lineIn) {
+vector<double> NeuralNetwork::forwardProp(const vector<double>& lineIn) {
   
   if (lineIn.size() != 54) {
     cerr << "line in not correct size\n";
@@ -121,7 +121,7 @@ vector<double> NeuralNetwork::findErrorVector(vector<double> output, int trainer
 }
 
 
-void NeuralNetwork::backProp(vector<double> lineIn, int trainer) {
+void NeuralNetwork::backProp(const vector<double>& lineIn, int trainer) {
 
   vector<double> out = forwardProp(lineIn);
   vector<double> err = findErrorVector(out, trainer);
@@ -175,16 +175,26 @@ int main() {
   net->init(alpha);
   cout << "net initialized with random weights\n";
   
-  for (int i = 400; i < 800; i++) {
-    vector<double> lineIn = d->getData()[i];
-    net->backProp(lineIn, d->getCover(i));
-    vector<double> thing = net->forwardProp(lineIn);
-    int max = 0;
-    for (int j = 0; j < thing.size(); j++){
-      cout << thing[j] << " ";
-      if (j != 0 && (thing[j] > thing[max]))
-	max = j;
+
+  //this is trainingish
+  double correct = 0;
+  for (int number = 0; number < 20; number++) {
+    for (int i = 0; i < 10000; i++) {
+      const vector<double>& lineIn = d->getData()[i];
+      net->backProp(lineIn, d->getCover(i));
     }
-    cout << d->getCover(i) << " " << max+1  << endl;
+    for (int i = NUM_EXAMPLES - 100000; i < NUM_EXAMPLES; i++) {
+      const vector<double>& lineIn = d->getData()[i];
+      vector<double> thing = net->forwardProp(lineIn);
+      int max = 0;
+      for (int j = 0; j < thing.size(); j++){
+	if (j != 0 && (thing[j] > thing[max]))
+	  max = j;
+      }
+      
+      if (max == d->getCover(i)) correct++;
+    }  
+    cout << "we got " << 100*correct/(double)(NUM_EXAMPLES-100000) << "% correct\n";
+    
   }
 }
