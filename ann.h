@@ -1,11 +1,14 @@
 #include "data.h"
 #include <cmath>
+#include <algorithm>
 
 struct layer {
   
   int inputs, numNodes;
   double **weights;
   double *outputs;
+  double *summed;
+  double *primed;
 
 };
 
@@ -16,7 +19,7 @@ class NeuralNetwork {
   NeuralNetwork(int numInputs, int numHidden);
   ~NeuralNetwork();
 
-  void init();
+  void init(double alpha);
 
   std::vector<double> forwardProp(std::vector<double> lineIn);
   std::vector<double> findErrorVector(std::vector<double> output, int trainer);
@@ -29,7 +32,8 @@ class NeuralNetwork {
   double sigmaPrime(double weightedSum);
 
  private:
-  
+  double learnRate;
+
   layer hidden, output;
 
   double * inputs;
