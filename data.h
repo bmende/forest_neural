@@ -9,8 +9,8 @@
 
 #define NUM_EXAMPLES 581012
 #define NUM_ATTRIBUTES 54
-#define NUM_TRAIN 7*1500
-#define NUM_VALIDATE 7*500
+#define NUM_TRAIN 7*1620
+#define NUM_VALIDATE 7*540
 #define NUM_TEST NUM_EXAMPLES - (NUM_TRAIN + NUM_VALIDATE)
 
 typedef std::vector< std::vector< double > > two_d_vec;
