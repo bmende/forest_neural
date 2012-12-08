@@ -6,6 +6,9 @@ using namespace std;
 
 Data::Data() :
   dataArray(vector<vector<double> >(NUM_EXAMPLES, vector<double>(NUM_ATTRIBUTES))),
+  training(vector<int>(NUM_TRAIN)),
+  validation(vector<int>(NUM_VALIDATE)),
+  test(vector<int>(NUM_TEST)),
   coverType(vector<int>(NUM_EXAMPLES))
 {
 }
@@ -49,12 +52,29 @@ void Data::readData() {
     outer++;
   }
 
+  //we will create the test and validation and test sets at the same time
+  //in the following way: the training, validation, and test arrays will
+  //contain the index in the dataArray of the desired example. Since there
+  //is no order in the examples of the dataArray, we will construct the training
+  //set by taking the first 1500 of each coverType, the validation by taking the 
+  //next 500 of each coverType, and the test set will be all the rest.
+  int numInTrain[7] = {0, 0, 0, 0, 0, 0, 0}, numInVal[7] = {0, 0, 0, 0, 0, 0, 0};
+  int trainAmount = 0, valAmount = 0, testAmount = 0;
   for (int i = 0; i < NUM_EXAMPLES; i++) {
     for (int j = 0; j < NUM_ATTRIBUTES; j++) {
       dataArray[i][j] = (dataArray[i][j] - min[j])/(max[j] - min[j]);
-      if (dataArray[i][j] > 1 || dataArray[i][j] < 0) {
-	
       }
+    if (numInTrain[coverType[i] - 1] < 1500 && trainAmount < NUM_TRAIN) {
+      training[trainAmount] = i;
+      trainAmount++;
+    } 
+    else if (numInVal[coverType[i] - 1] < 500 && valAmount < NUM_VALIDATE) {
+      validation[valAmount] = i;
+      valAmount++;
+    } 
+    else {
+      test[testAmount] = i;
+      testAmount++;
     }
   }
 

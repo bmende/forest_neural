@@ -1,5 +1,6 @@
 #include "data.h"
 #include <cmath>
+#include <ctime>
 #include <algorithm>
 
 struct layer {
@@ -22,7 +23,7 @@ class NeuralNetwork {
   void init(double alpha);
 
   std::vector<double> forwardProp(const std::vector<double>& lineIn);
-  std::vector<double> findErrorVector(std::vector<double> output, int trainer);
+  std::vector<double> findErrorVector(std::vector<double> trainee, int trainer);
 
   void backProp(const std::vector<double>& lineIn, int trainer);
   

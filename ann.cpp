@@ -31,7 +31,9 @@ void NeuralNetwork::init(double alpha) {
 
   learnRate = alpha;
 
-  //initializing weights to 0.5 each. TODO: make random initial weights
+  //initializing weights to 0.5 each.
+
+  std::srand( std::time( NULL ) );
   
   for (int i = 0; i < hidden.numNodes; i++) {
     for (int j = 0; j < hidden.inputs; j++) {
@@ -108,14 +110,14 @@ vector<double> NeuralNetwork::forwardProp(const vector<double>& lineIn) {
   return answer;
 }
 
-vector<double> NeuralNetwork::findErrorVector(vector<double> output, int trainer) {
+vector<double> NeuralNetwork::findErrorVector(vector<double> trainee, int trainer) {
 
-  vector<double> error(output.size(), 0);
+  vector<double> error(trainee.size(), 0);
   for (int i = 0; i < error.size(); i++) {
     if ((trainer-1) == i)
-      error[i] = 1.0 - output[i];
+      error[i] = 1.0 - trainee[i];
     else
-      error[i] = 0.0 - output[i];
+      error[i] = 0.0 - trainee[i];
   }
   return error;
 }
@@ -171,30 +173,39 @@ int main() {
   d->readData();
   cout << "data read\nnow making net\n";
   NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, 120);
-  double alpha = 0.05; //this is the learning rate
+  double alpha = 0.1; //this is the learning rate
   net->init(alpha);
   cout << "net initialized with random weights\n";
   
+  const vector<int> train = d->getTraining();
+  const vector<int> val = d->getValidation();
+  const vector<int> test = d->getTest();
 
   //this is trainingish
-  double correct = 0;
-  for (int number = 0; number < 20; number++) {
-    for (int i = 0; i < 10000; i++) {
-      const vector<double>& lineIn = d->getData()[i];
-      net->backProp(lineIn, d->getCover(i));
+  double meanErr = 10000, prevMeanErr = meanErr;
+  int epoch = 0;
+  double tolerance = 0.1; // I think it should be one std dev, but I havent calculated this yet.
+  while (meanErr > 0.4) {
+    for (int i = 0; i < NUM_TRAIN; i++) {
+      const vector<double>& lineIn = d->getData()[train[i]];
+      net->backProp(lineIn, d->getCover(train[i]));
     }
-    for (int i = NUM_EXAMPLES - 100000; i < NUM_EXAMPLES; i++) {
-      const vector<double>& lineIn = d->getData()[i];
-      vector<double> thing = net->forwardProp(lineIn);
-      int max = 0;
-      for (int j = 0; j < thing.size(); j++){
-	if (j != 0 && (thing[j] > thing[max]))
-	  max = j;
-      }
-      
-      if (max == d->getCover(i)) correct++;
-    }  
-    cout << "we got " << 100*correct/(double)(NUM_EXAMPLES-100000) << "% correct\n";
     
+    prevMeanErr = meanErr;
+    meanErr = 0;
+    for (int i = 0; i < NUM_VALIDATE; i++) {
+      const vector<double>& lineIn = d->getData()[val[i]];
+      vector<double> thing = net->forwardProp(lineIn);
+      vector<double> error = net->findErrorVector(thing, d->getCover(val[i]));
+      double tempError = 0;
+      for (int j = 0; j < error.size(); j++){
+	tempError += pow(error[j], 2);
+      }
+      // tempError /= error.size();
+      meanErr += tempError;
+    }  
+    meanErr /= NUM_VALIDATE;
+    cout << epoch << " " << meanErr <<endl;
+    epoch++;
   }
 }
