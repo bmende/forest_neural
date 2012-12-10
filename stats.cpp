@@ -54,7 +54,7 @@ int main() {
   double meanErr = 10000, prevMeanErr = meanErr;
   int epoch = 0;
   double tolerance = 0.1; // I think it should be one std dev, but I havent calculated this yet.
-  while (meanErr > 0.55) {
+  while (meanErr > 0.9) {
     for (int i = 0; i < NUM_TRAIN; i++) {
       const vector<double>& lineIn = d->getData()[train[i]];
       net->backProp(lineIn, d->getCover(train[i]));
@@ -78,6 +78,8 @@ int main() {
     epoch++;
   }
 
+  string blah ("weights.dat");
+  net->readWeightsToFile(blah);
 
   //now we test
   double correct = 0;
@@ -98,7 +100,34 @@ int main() {
     if (maxIndex == 0) correct++;
   }
   
-  cout << "the percent correct is " << correct << endl;
+  cout << "the number correct is " << correct << endl;
   s->print();
   
+  for (int i = 0; i < 7; i++)
+    for (int j = 0; j < 7; j++) 
+      s->statistics[i][j] = 0;
+
+  
+  net->readWeightsFromFile(blah);
+  //now we test
+  correct = 0;
+  for (int i = 0; i < NUM_TEST; i++) {
+    const vector<double>& lineIn = d->getData()[test[i]];
+    vector<double> result = net->forwardProp(lineIn);
+    //now to compare
+    int maxIndex = 0;
+    double maxVal = -1;
+    for (int j = 0; j < 7; j++) {
+      if (result[j] > maxVal){
+	maxVal = result[j];
+	maxIndex = j;
+      }
+    }
+    int actualTree = d->getCover(test[i]);
+    s->statistics[maxIndex][actualTree - 1]++;
+    if (maxIndex == 0) correct++;
+  }
+  
+  cout << "the number correct is " << correct << endl;
+  s->print();
 }

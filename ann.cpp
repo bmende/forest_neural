@@ -164,47 +164,57 @@ void NeuralNetwork::backProp(const vector<double>& lineIn, int trainer) {
   }
 }
 
-// int main() {
 
-//   Data *d = new Data();
+void NeuralNetwork::readWeightsToFile(string fileName)
+{
 
-//   cout << "reading data\n";
-//   d->readData();
-//   cout << "data read\nnow making net\n";
-//   NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, 120);
-//   double alpha = 0.1; //this is the learning rate
-//   net->init(alpha);
-//   cout << "net initialized with random weights\n";
+  ofstream saving;
+  saving.open(fileName.c_str());
+
+  for (int i = 0; i < hidden.numNodes; i++) {
+    for (int j = 0; j < hidden.inputs; j++) {
+      saving << hidden.weights[i][j] << " ";
+    }
+    saving << endl;
+  }
   
-//   const vector<int> train = d->getTraining();
-//   const vector<int> val = d->getValidation();
-//   const vector<int> test = d->getTest();
+  for (int i = 0; i < output.numNodes; i++) {
+    for (int j = 0; j < output.inputs; j++) {
+      saving << output.weights[i][j] << " ";
+    }
+    saving << endl;
+  }
 
-//   //this is trainingish
-//   double meanErr = 10000, prevMeanErr = meanErr;
-//   int epoch = 0;
-//   double tolerance = 0.1; // I think it should be one std dev, but I havent calculated this yet.
-//   while (meanErr > 0.4) {
-//     for (int i = 0; i < NUM_TRAIN; i++) {
-//       const vector<double>& lineIn = d->getData()[train[i]];
-//       net->backProp(lineIn, d->getCover(train[i]));
-//     }
-    
-//     prevMeanErr = meanErr;
-//     meanErr = 0;
-//     for (int i = 0; i < NUM_VALIDATE; i++) {
-//       const vector<double>& lineIn = d->getData()[val[i]];
-//       vector<double> thing = net->forwardProp(lineIn);
-//       vector<double> error = net->findErrorVector(thing, d->getCover(val[i]));
-//       double tempError = 0;
-//       for (int j = 0; j < error.size(); j++){
-// 	tempError += pow(error[j], 2);
-//       }
-//       // tempError /= error.size();
-//       meanErr += tempError;
-//     }  
-//     meanErr /= NUM_VALIDATE;
-//     cout << epoch << " " << meanErr <<endl;
-//     epoch++;
-//   }
-// }
+  saving.close();
+
+}
+
+void NeuralNetwork::readWeightsFromFile(string fileName)
+{
+
+
+  ifstream saved;
+  saved.open(fileName.c_str());
+
+  string line;
+  for (int i = 0; i < hidden.numNodes; i++) {
+    std::getline(saved, line);
+    istringstream stream(line);
+    char value[100];
+    for (int j = 0; j < hidden.inputs; j++) {
+      stream.getline(value, 100, ' ');
+      hidden.weights[i][j] = std::atof(value);
+    }
+  }
+
+  for (int i = 0; i < output.numNodes; i++) {
+    std::getline(saved, line);
+    istringstream stream(line);
+    char value[100];
+    for (int j = 0; j < output.inputs; j++) {
+      stream.getline(value, 100, ' ');
+      output.weights[i][j] = std::atof(value);
+    }
+  }
+
+}
