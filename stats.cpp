@@ -18,7 +18,7 @@ Stats::Stats() {
 
 
 void Stats::print() {
-
+    cout << "-----------------------------\nStats:\n-----------------------------" << endl;
 
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 7; j++) {
@@ -27,9 +27,31 @@ void Stats::print() {
     }
     std::cout << std::endl;
   }
-
-  cout << endl;
-  
+    
+    cout << "-----------------------------" << endl;
+    
+    double totalCorrect = 0;
+    for (int i = 0; i < 7; i++)
+    {
+        double typeCorrect = statistics[i][i];
+        double typeIncorrect = 0;
+        totalCorrect += typeCorrect;
+        
+        cout << i+1 << ":" << endl;
+        for (int j = 0; j < 7; j++)
+        {
+            if (j == i)
+                continue;
+            
+            typeIncorrect += statistics[j][i];
+        }
+        double typeAccuracy = typeCorrect + typeIncorrect > 0 ? 100*typeCorrect/(typeCorrect + typeIncorrect) : 100;
+        cout << typeAccuracy << "%  accuracy (" << typeCorrect << "/" << typeCorrect + typeIncorrect << ")" << endl;
+        cout << "-----------------------------" << endl;
+    }
+    
+    double totalAccuracy = 100*totalCorrect / (double)NUM_TEST;
+    cout << "total accuracy: " << totalAccuracy << "% (" << totalCorrect << "/" << NUM_TEST << ")\n" << endl;
 }
 
 
@@ -41,7 +63,7 @@ int main() {
   cout << "reading data\n";
   d->readData();
   cout << "data read\nnow making net\n";
-  NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, 120);
+  NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, 10);
   double alpha = 0.1; //this is the learning rate
   net->init(alpha);
   cout << "net initialized with random weights\n";
@@ -54,7 +76,7 @@ int main() {
   double meanErr = 10000, prevMeanErr = meanErr;
   int epoch = 0;
   double tolerance = 0.1; // I think it should be one std dev, but I havent calculated this yet.
-  while (meanErr > 0.9) {
+  while (meanErr > 0.50) {
     for (int i = 0; i < NUM_TRAIN; i++) {
       const vector<double>& lineIn = d->getData()[train[i]];
       net->backProp(lineIn, d->getCover(train[i]));
@@ -78,8 +100,10 @@ int main() {
     epoch++;
   }
 
-  string blah ("weights.dat");
-  net->readWeightsToFile(blah);
+//  string blah ("weights55-10.dat");
+//  net->readWeightsToFile(blah);
+    
+//  net->readWeightsFromFile("weights.dat");
 
   //now we test
   double correct = 0;
@@ -91,43 +115,14 @@ int main() {
     double maxVal = -1;
     for (int j = 0; j < 7; j++) {
       if (result[j] > maxVal){
-	maxVal = result[j];
-	maxIndex = j;
+        maxVal = result[j];
+        maxIndex = j;
       }
     }
     int actualTree = d->getCover(test[i]);
     s->statistics[maxIndex][actualTree - 1]++;
-    if (maxIndex == 0) correct++;
+    if (maxIndex == actualTree-1) correct++;
   }
-  
-  cout << "the number correct is " << correct << endl;
-  s->print();
-  
-  for (int i = 0; i < 7; i++)
-    for (int j = 0; j < 7; j++) 
-      s->statistics[i][j] = 0;
 
-  
-  net->readWeightsFromFile(blah);
-  //now we test
-  correct = 0;
-  for (int i = 0; i < NUM_TEST; i++) {
-    const vector<double>& lineIn = d->getData()[test[i]];
-    vector<double> result = net->forwardProp(lineIn);
-    //now to compare
-    int maxIndex = 0;
-    double maxVal = -1;
-    for (int j = 0; j < 7; j++) {
-      if (result[j] > maxVal){
-	maxVal = result[j];
-	maxIndex = j;
-      }
-    }
-    int actualTree = d->getCover(test[i]);
-    s->statistics[maxIndex][actualTree - 1]++;
-    if (maxIndex == 0) correct++;
-  }
-  
-  cout << "the number correct is " << correct << endl;
   s->print();
 }
