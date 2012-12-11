@@ -54,6 +54,59 @@ void Stats::print() {
     cout << "total accuracy: " << totalAccuracy << "% (" << totalCorrect << "/" << NUM_TEST << ")\n" << endl;
 }
 
+void Stats::writeToFile(string path)
+{
+    // ensure we are writing to a .csv file
+    if (!path.substr(path.size()-3).compare(".csv"))
+    {
+        path = path.append(".csv");
+    }
+    
+    ofstream outputStream;
+    
+    // check if file exists
+    ifstream existingFile(path.c_str());
+    
+    if (existingFile.good())
+    {
+        // if it does, append to it
+        outputStream.open(path.c_str(), ios::app);
+    }
+    else
+    {
+        // if it doesn't just create it and start writing
+        outputStream.open(path.c_str());
+        
+        // column headers
+        outputStream << "EPOCH, # HIDDEN, MSE, 1 ACC, 2 ACC, 3 ACC, 4 ACC, 5 ACC, 6 ACC, 7 ACC, AVG ACC, TOTAL ACC" << endl;
+    }
+    
+    outputStream.precision(5);
+    outputStream << "?, ?, ?, ";
+    
+    double totalCorrect = 0;
+    for (int i = 0; i < 7; i++)
+    {
+        double typeCorrect = statistics[i][i];
+        double typeIncorrect = 0;
+        totalCorrect += typeCorrect;
+        
+        for (int j = 0; j < 7; j++)
+        {
+            if (j == i)
+                continue;
+            
+            typeIncorrect += statistics[j][i];
+        }
+        double typeAccuracy = typeCorrect + typeIncorrect > 0 ? 100*typeCorrect/(typeCorrect + typeIncorrect) : 100;
+        outputStream << typeAccuracy << ", ";
+    }
+    
+    double totalAccuracy = 100*totalCorrect / (double)NUM_TEST;
+    outputStream << totalAccuracy << endl;
+    
+    outputStream.close();
+}
 
 int main() {
 
@@ -76,7 +129,7 @@ int main() {
   double meanErr = 10000, prevMeanErr = meanErr;
   int epoch = 0;
   double tolerance = 0.1; // I think it should be one std dev, but I havent calculated this yet.
-  while (meanErr > 0.50) {
+  while (meanErr > 0.8) {
     for (int i = 0; i < NUM_TRAIN; i++) {
       const vector<double>& lineIn = d->getData()[train[i]];
       net->backProp(lineIn, d->getCover(train[i]));
@@ -125,4 +178,5 @@ int main() {
   }
 
   s->print();
+  s->writeToFile("stats.csv");
 }

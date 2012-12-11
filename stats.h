@@ -11,6 +11,7 @@ class Stats {
 
 
   void print();
+    void writeToFile(std::string path);
 
 
   int statistics[7][7];
