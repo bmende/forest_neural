@@ -4,8 +4,11 @@
 using namespace std;
 
 
-Stats::Stats():d(new Data()) {
+Stats::Stats(int numEpochs, bool debug):d(new Data()) {
 
+
+  num_epochs = numEpochs;
+  isDebug = debug;
 
   d->readData();
   for (int i = 0; i < 7; i++) {
@@ -77,8 +80,9 @@ void Stats::getWeights(int numHidden, double learnRate)
 
   double meanErr;
 
-  for (int epoch = 0; epoch <= NUM_EPOCHS; epoch++) {
-    cout << 100*(double)epoch/(double)NUM_EPOCHS << " percent trained" << endl;
+  for (int epoch = 0; epoch <= num_epochs; epoch++) {
+    if (isDebug)
+      cout << 100*(double)epoch/(double)num_epochs << "\tpercent trained" << endl;
     for (int i = 0; i < NUM_TRAIN; i++) {
       const vector<double>& lineIn = d->getData()[train[i]];
       net->backProp(lineIn, d->getCover(train[i]));
@@ -208,18 +212,29 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
   
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
-  Stats *s = new Stats();
+  if (argc != 3) {
+    cerr << "USAGE: 'progName' numHiddenNodes numEpochs" << endl;
+    exit(1);
+  }
+
+  int numHidden = atoi(argv[1]);
+  int numEpochs = atoi(argv[2]);
+ 
+  bool debug = true;
+  
+  Stats *s = new Stats(numEpochs, debug);
 
 
   
-  s->getWeights(120, 0.05);
+  s->getWeights(numHidden, 0.05);
   
-  for (int i = 0; i <= NUM_EPOCHS; i+=10) {
-    cout << 100*(double)i/(double)(NUM_EPOCHS) << " percent tested\n";
+  for (int i = 0; i <= numEpochs; i+=10) {
+    if (debug)
+      cout << 100*(double)i/(double)(numEpochs) << "\tpercent tested\n";
     stringstream fileName;
-    fileName << 120 << "-" << i << ".weights";
-    s->testWeights(fileName.str(), 120, 0.05);
+    fileName << numHidden << "-" << i << ".weights";
+    s->testWeights(fileName.str(), numHidden, 0.05);
   }
 }

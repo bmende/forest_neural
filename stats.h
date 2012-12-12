@@ -1,12 +1,9 @@
 #include "ann.h"
 
-
-#define NUM_EPOCHS 300
-
 class Stats {
 
  public:
-  Stats();
+  Stats(int numEpochs, bool debug);
   ~Stats();
 
 
@@ -19,4 +16,6 @@ class Stats {
  private:
   int statistics[7][7];
   Data *d;
+  int num_epochs;
+  bool isDebug;
 };
