@@ -107,7 +107,7 @@ void NeuralNetwork::backProp(const vector<double>& lineIn, int trainer) {
   for (int outNode = 0; outNode < output.numNodes; outNode++) {
     for (int inNode = 0; inNode < output.inputs; inNode++) {
       double old_weight = output.weights[outNode][inNode];
-      double new_weight = learnRate * inputs[inNode] * err[outNode];
+      double new_weight = learnRate * lineIn[inNode] * err[outNode];
       new_weight += old_weight;
       output.weights[outNode][inNode] = new_weight;
     }
