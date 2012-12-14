@@ -69,11 +69,11 @@ void Stats::print() {
     cout << "total accuracy: " << totalAccuracy << "% (" << totalCorrect << "/" << NUM_TEST << ")\n" << endl;
 }
 
-void Stats::getWeights(int numHidden, double learnRate)
+void Stats::getWeights(double learnRate)
 {
 
   
-  NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, numHidden);
+  NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES);
   net->init(learnRate);
 
   const vector<int> train = d->getTraining();
@@ -91,7 +91,7 @@ void Stats::getWeights(int numHidden, double learnRate)
     if (epoch % 10 == 0) {
       //now we save the weights
       stringstream weightsFileName;
-      weightsFileName << numHidden << "-" << epoch << ".weights";
+      weightsFileName << learnRate << "-" << epoch << ".weights";
       net->readWeightsToFile(weightsFileName.str());
       
     }
@@ -165,7 +165,7 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
   const vector<int> test = d->getTest();
   const vector<int> val = d->getValidation();
 
-  NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES, numHidden);
+  NeuralNetwork *net = new NeuralNetwork(NUM_ATTRIBUTES);
   net->init(learnRate);
   net->readWeightsFromFile(weightFileName);
 
@@ -215,11 +215,11 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
 int main(int argc, char *argv[]) {
 
   if (argc != 3) {
-    cerr << "USAGE: 'progName' numHiddenNodes numEpochs" << endl;
+    cerr << "USAGE: 'progName' learnRate numEpochs" << endl;
     exit(1);
   }
 
-  int numHidden = atoi(argv[1]);
+  double learnRate = atof(argv[1]);
   int numEpochs = atoi(argv[2]);
  
   bool debug = true;
@@ -228,13 +228,13 @@ int main(int argc, char *argv[]) {
 
 
   
-  s->getWeights(numHidden, 0.05);
+  s->getWeights(learnRate);
   
   for (int i = 0; i <= numEpochs; i+=10) {
     if (debug)
       cout << 100*(double)i/(double)(numEpochs) << "\tpercent tested\n";
     stringstream fileName;
-    fileName << numHidden << "-" << i << ".weights";
-    s->testWeights(fileName.str(), numHidden, 0.05);
+    fileName << learnRate << "-" << i << ".weights";
+    s->testWeights(fileName.str(), 0, learnRate);
   }
 }

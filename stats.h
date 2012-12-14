@@ -8,7 +8,7 @@ class Stats {
 
 
   void print();
-  void getWeights(int numHidden, double learnRate);
+  void getWeights(double learnRate);
   void testWeights(std::string weightFileName, int numHidden, double learnRate);
   void reset();
   void writeToFile(std::string path, int epoch, int numHidden, double mse);

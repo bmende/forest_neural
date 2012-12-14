@@ -17,11 +17,10 @@ class NeuralNetwork {
 
  public:
 
-  NeuralNetwork(int numInputs, int numHidden);
+  NeuralNetwork(int numInputs);
   ~NeuralNetwork();
 
   void init(double alpha);
-  void init(double **hiddenWeights, double **outputWeights, double alpha);
 
   std::vector<double> forwardProp(const std::vector<double>& lineIn);
   std::vector<double> findErrorVector(std::vector<double> trainee, int trainer);
@@ -39,7 +38,7 @@ class NeuralNetwork {
  private:
   double learnRate;
 
-  layer hidden, output;
+  layer output;
 
   double * inputs;
 };
