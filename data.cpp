@@ -13,6 +13,7 @@ Data::Data() :
 {
 }
 
+// read the data set in from the file. Instances in the file are 54 comma separated values per instance. Instance are separated by a new line character
 void Data::readData() {
 
 
@@ -82,12 +83,3 @@ void Data::readData() {
   dataFile.close(); //we no longer need the file to be open.
 
 }
-
-
-// int main() {
-
-//   Data *d = new Data();
-
-//   d->readData();
-
-// }

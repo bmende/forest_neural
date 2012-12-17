@@ -3,9 +3,10 @@
 
 using namespace std;
 
+// create the network layers with proper sizes
 NeuralNetwork::NeuralNetwork(int numInputs, int numHidden) {
 
-
+  // create hidden layer
   hidden.inputs = numInputs; hidden.numNodes = numHidden;
   hidden.weights = new double*[hidden.numNodes];
   for (int i = 0; i < hidden.numNodes; i++) 
@@ -14,6 +15,7 @@ NeuralNetwork::NeuralNetwork(int numInputs, int numHidden) {
   hidden.summed = new double[hidden.numNodes];
   hidden.primed = new double[hidden.numNodes];
 
+  // create output layer
   output.inputs = hidden.numNodes; output.numNodes = 7;
   output.weights = new double*[output.numNodes];
   for (int i = 0; i < output.numNodes; i++)
@@ -22,7 +24,7 @@ NeuralNetwork::NeuralNetwork(int numInputs, int numHidden) {
   output.summed = new double[output.numNodes];
   output.primed = new double[output.numNodes];
 
-  
+  // create input layer
   inputs = new double[numInputs];
 
 }
@@ -34,6 +36,7 @@ void NeuralNetwork::init(double alpha) {
 
   std::srand( std::time( NULL ) );
   
+  // initialize hidden layer weights randomly between 0 an 1/numHidden
   for (int i = 0; i < hidden.numNodes; i++) {
     for (int j = 0; j < hidden.inputs; j++) {
       hidden.weights[i][j] = (double)std::rand() / (double)RAND_MAX;
@@ -44,6 +47,7 @@ void NeuralNetwork::init(double alpha) {
     hidden.primed[i] = 0;
   }
 
+  // initialize output layer weights randomly between 0 and 1/7
   for (int i = 0; i < output.numNodes; i++) {
     for (int j = 0; j < output.inputs; j++) {
       output.weights[i][j] = (double)std::rand() / (double)RAND_MAX;
@@ -55,6 +59,7 @@ void NeuralNetwork::init(double alpha) {
   }
 }
 
+// sigmoid used for activation function
 double NeuralNetwork::sigma(double weightedSum) {
   //this function is sigma(x) = 1/(1+e^(-x))
 
@@ -65,18 +70,23 @@ double NeuralNetwork::sigma(double weightedSum) {
   return answer;
 }
 
+
+// derivative of sigmoid
 double NeuralNetwork::sigmaPrime(double weightedSum) {
   double sig = sigma(weightedSum);
 
   return sig*(1-sig);
 }
 
+
+// feed an input vector into the network
 vector<double> NeuralNetwork::forwardProp(const vector<double>& lineIn) {
   
   if (lineIn.size() != 54) {
     cerr << "line in not correct size\n";
     exit(1);
-  } 
+  }
+    
   //putting data in input nodes
   for (int i = 0; i < lineIn.size(); i++) {
     inputs[i] = lineIn[i];
@@ -103,12 +113,16 @@ vector<double> NeuralNetwork::forwardProp(const vector<double>& lineIn) {
     output.summed[node] = sum;
     output.primed[node] = sigmaPrime(sum);
   }
+    
+  //create output vector
   vector<double> answer(output.numNodes, 0);
   for (int i = 0; i < answer.size(); i++)
     answer[i] = output.outputs[i];
   return answer;
 }
 
+
+// calculate the error vector where each element is the desired value - what the network got
 vector<double> NeuralNetwork::findErrorVector(vector<double> trainee, int trainer) {
 
   vector<double> error(trainee.size(), 0);
@@ -122,6 +136,7 @@ vector<double> NeuralNetwork::findErrorVector(vector<double> trainee, int traine
 }
 
 
+// adjust weights of the network using back propagation
 void NeuralNetwork::backProp(const vector<double>& lineIn, int trainer) {
 
   vector<double> out = forwardProp(lineIn);
@@ -165,12 +180,14 @@ void NeuralNetwork::backProp(const vector<double>& lineIn, int trainer) {
 }
 
 
+// save the networks current weights to a file so it can be loaded up later. This essentially takes a snapshot of the network
 void NeuralNetwork::readWeightsToFile(string fileName)
 {
 
   ofstream saving;
   saving.open(fileName.c_str());
 
+  // save hidden layer weights
   for (int i = 0; i < hidden.numNodes; i++) {
     for (int j = 0; j < hidden.inputs; j++) {
       saving << hidden.weights[i][j] << " ";
@@ -178,6 +195,7 @@ void NeuralNetwork::readWeightsToFile(string fileName)
     saving << endl;
   }
   
+  // save output layer weights
   for (int i = 0; i < output.numNodes; i++) {
     for (int j = 0; j < output.inputs; j++) {
       saving << output.weights[i][j] << " ";
@@ -189,6 +207,7 @@ void NeuralNetwork::readWeightsToFile(string fileName)
 
 }
 
+// load up a neural net from a file containing the weights
 void NeuralNetwork::readWeightsFromFile(string fileName)
 {
 
@@ -196,6 +215,7 @@ void NeuralNetwork::readWeightsFromFile(string fileName)
   ifstream saved;
   saved.open(fileName.c_str());
 
+  // load up the hidden layer
   string line;
   for (int i = 0; i < hidden.numNodes; i++) {
     std::getline(saved, line);
@@ -207,6 +227,7 @@ void NeuralNetwork::readWeightsFromFile(string fileName)
     }
   }
 
+  // load up the output layer
   for (int i = 0; i < output.numNodes; i++) {
     std::getline(saved, line);
     istringstream stream(line);

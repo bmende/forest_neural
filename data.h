@@ -7,11 +7,11 @@
 
 #pragma once
 
-#define NUM_EXAMPLES 581012
-#define NUM_ATTRIBUTES 54
-#define NUM_TRAIN 7*1620
-#define NUM_VALIDATE 7*540
-#define NUM_TEST (NUM_EXAMPLES - (NUM_TRAIN + NUM_VALIDATE))
+#define NUM_EXAMPLES 581012 // total instances in data set
+#define NUM_ATTRIBUTES 54 // number of input nodes
+#define NUM_TRAIN 7*1620  // size of training set (1620 of each type)
+#define NUM_VALIDATE 7*540 // size of validations et (540 of each type)
+#define NUM_TEST (NUM_EXAMPLES - (NUM_TRAIN + NUM_VALIDATE)) // test set is all the rest
 
 typedef std::vector< std::vector< double > > two_d_vec;
 

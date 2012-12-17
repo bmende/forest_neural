@@ -31,7 +31,7 @@ class NeuralNetwork {
   void readWeightsToFile(std::string fileName);
   void readWeightsFromFile(std::string fileName);
   
-  //these functions are only used by NeuralNetwork
+  //these functions are only used by NeuralNetwork. Activation function stuff
  private: 
   double sigma(double weightedSum);
   double sigmaPrime(double weightedSum);

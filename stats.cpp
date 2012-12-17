@@ -20,6 +20,7 @@ Stats::Stats(int numEpochs, bool debug):d(new Data()) {
   }
 }
 
+// set every thing in the stats array to 0
 void Stats::reset() {
 
   for (int i = 0; i < 7; i++) {
@@ -27,14 +28,14 @@ void Stats::reset() {
       statistics[i][j] = 0;
     }
   }
-
-
-
 }
 
+
+// print out a bunch of stats to the terminal
 void Stats::print() {
     cout << "-----------------------------\nStats:\n-----------------------------" << endl;
 
+  // just print out the truth vs guess table
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 7; j++) {
       
@@ -45,6 +46,8 @@ void Stats::print() {
     
     cout << "-----------------------------" << endl;
     
+    
+    // calculate the accuracy for each type and the total accuracy in one pass through the stats array
     double totalCorrect = 0;
     for (int i = 0; i < 7; i++)
     {
@@ -69,6 +72,7 @@ void Stats::print() {
     cout << "total accuracy: " << totalAccuracy << "% (" << totalCorrect << "/" << NUM_TEST << ")\n" << endl;
 }
 
+// train and save weights every 10 epochs
 void Stats::getWeights(int numHidden, double learnRate)
 {
 
@@ -98,7 +102,7 @@ void Stats::getWeights(int numHidden, double learnRate)
   }
 }
 
-
+// write stats out to a .csv file. If the file doesn't exist yet, it is created. Otherwise, stats are appending to the existing file
 void Stats::writeToFile(string path, int epoch, int numHidden, double mse)
 {
     // ensure we are writing to a .csv file
@@ -129,6 +133,7 @@ void Stats::writeToFile(string path, int epoch, int numHidden, double mse)
     outputStream.precision(5);
     outputStream << numHidden << ", " << epoch << ", " << mse << ", ";
     
+    // calculate accuracy of each type and total accuracy in one pass through the stats array
     double totalCorrect = 0;
     for (int i = 0; i < 7; i++)
     {
@@ -153,9 +158,11 @@ void Stats::writeToFile(string path, int epoch, int numHidden, double mse)
     outputStream.close();
 }
 
+// load in weights from a .weights file and run the test set through it. Saves stats of the test
 void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
 {
   
+  // extract the epoch number from the .weights file name
   int posHyph = weightFileName.find("-");
   int posPer = weightFileName.find(".");
   int epoch = atoi(weightFileName.substr(posHyph + 1, posPer - posHyph).c_str());
@@ -174,6 +181,7 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
 
   double meanErr = 0;
     
+  // run the validation set to get MSE
   for (int i = 0; i < NUM_VALIDATE; i++) {
      
     const vector<double>& lineIn = d->getData()[val[i]];
@@ -186,9 +194,11 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
     }
     meanErr += tempError;
   }
-
+  
+  // normalize by the number of instances in the validation set
   meanErr /= NUM_VALIDATE;
 
+  // run the test set through the net
   for (int i = 0; i < NUM_TEST; i++) {
     const vector<double>& lineIn = d->getData()[test[i]];
     vector<double> result = net->forwardProp(lineIn);
@@ -205,6 +215,7 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
     statistics[maxIndex][actualTree - 1]++;
   }
 
+  // write stats out to the .csv file
   stringstream statsFile;
   statsFile << numHidden << "-stats.csv";
 
@@ -212,6 +223,7 @@ void Stats::testWeights(string weightFileName, int numHidden, double learnRate)
   
 }
 
+// where all the action happens. 
 int main(int argc, char *argv[]) {
 
   if (argc != 3) {
@@ -227,14 +239,17 @@ int main(int argc, char *argv[]) {
   Stats *s = new Stats(numEpochs, debug);
 
 
-  
+  // train and save weights along the way
   s->getWeights(numHidden, 0.05);
   
+  // gather stats on the networks every 10 epochs by loading the saved weights and running the net on the test set. Saves stat results to a .csv file
   for (int i = 0; i <= numEpochs; i+=10) {
     if (debug)
       cout << 100*(double)i/(double)(numEpochs) << "\tpercent tested\n";
     stringstream fileName;
     fileName << numHidden << "-" << i << ".weights";
+      
+    // run test set on the net saved in the numHidden-epoch.weights file and gather stats on it
     s->testWeights(fileName.str(), numHidden, 0.05);
   }
 }
